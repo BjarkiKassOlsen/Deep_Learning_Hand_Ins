@@ -62,9 +62,11 @@ def custom_dataLoader():
     # Create an instance of the dataset
     insects_dataset = InsectsDataset(csv_file=csv_file, root_dir=Image_folder, transform=transform)
 
+    batches = 4
+
     # Set up the dataset.
     trainloader = torch.utils.data.DataLoader(insects_dataset, 
-                                            batch_size=4, 
+                                            batch_size=batches, 
                                             shuffle=True, 
                                             num_workers=2)
 
@@ -75,12 +77,34 @@ def custom_dataLoader():
     # Move data (tensors) to the GPU
     images = images.to(device)
 
-    for i in range(5): #Run through 5 bathes
+    # How many batches to show
+    num_examples = 5
+
+    # Scale the figure size based on the number of batches and examples
+    scale_of_figure = 3
+
+    # Adjust the number of columns and rows to display, together with the figsize,
+    # given how large the batches are and the number of examples we want to show
+    fig, axs = plt.subplots(num_examples, batches, 
+                            figsize=(scale_of_figure * batches, scale_of_figure * num_examples)) 
+
+    img_count = 0
+    for i in range(num_examples): # Run through 5 batches
         images, labels = dataiter.next()
         images = images.to(device) # Move the tensors to the GPU
-        for image, label in zip(images,labels): # Run through all samples in a batch
-            plt.figure()
-            # Before plotting or any operation that requires a numpy conversion, send it back to CPU
-            plt.imshow(np.transpose(image.cpu().numpy(), (1, 2, 0)))
-            plt.title(label)
-            plt.show()
+        for image, label in zip(images, labels): # Run through all samples in a batch
+            row = img_count // batches
+            col = img_count % batches
+            axs[row, col].imshow(np.transpose(image.cpu().numpy(), (1, 2, 0)))
+            axs[row, col].set_title(label)
+            axs[row, col].axis('off')
+            img_count += 1
+
+    # If there are unused subplot axes at the end, turn them off
+    for idx in range(img_count, num_examples * batches):
+        row = idx // batches
+        col = idx % batches
+        axs[row, col].axis('off')
+
+    plt.tight_layout()
+    plt.show()
