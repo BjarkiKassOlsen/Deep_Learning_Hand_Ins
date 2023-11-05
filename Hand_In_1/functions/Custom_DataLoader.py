@@ -72,7 +72,7 @@ def custom_dataLoader():
 
     # get some images
     dataiter = iter(trainloader)
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     # Move data (tensors) to the GPU
     images = images.to(device)
@@ -90,7 +90,7 @@ def custom_dataLoader():
 
     img_count = 0
     for i in range(num_examples): # Run through 5 batches
-        images, labels = dataiter.next()
+        images, labels = next(dataiter)
         images = images.to(device) # Move the tensors to the GPU
         for image, label in zip(images, labels): # Run through all samples in a batch
             row = img_count // batches
